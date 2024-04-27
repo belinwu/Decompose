@@ -1,5 +1,6 @@
 package com.arkivanov.decompose.extensions.compose.stack
 
+import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
@@ -20,7 +21,7 @@ fun <C : Any, T : Any> Children(
     stack: ChildStack<C, T>,
     modifier: Modifier = Modifier,
     animation: StackAnimation<C, T>? = null,
-    content: @Composable (child: Child.Created<C, T>) -> Unit,
+    content: @Composable AnimatedVisibilityScope.(child: Child.Created<C, T>) -> Unit,
 ) {
     val holder = rememberSaveableStateHolder()
 
@@ -41,7 +42,7 @@ fun <C : Any, T : Any> Children(
     stack: Value<ChildStack<C, T>>,
     modifier: Modifier = Modifier,
     animation: StackAnimation<C, T>? = null,
-    content: @Composable (child: Child.Created<C, T>) -> Unit,
+    content: @Composable AnimatedVisibilityScope.(child: Child.Created<C, T>) -> Unit,
 ) {
     val state = stack.subscribeAsState()
 

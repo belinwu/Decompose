@@ -14,14 +14,12 @@ fun scale(
     frontFactor: Float = 1.15F,
     backFactor: Float = 0.95F,
 ): StackAnimator =
-    stackAnimator(animationSpec = animationSpec) { factor, _, content ->
-        content(
-            Modifier.scale(
-                if (factor >= 0F) {
-                    factor * (frontFactor - 1F) + 1F
-                } else {
-                    factor * (1F - backFactor) + 1F
-                }
-            )
+    stackAnimator(animationSpec = animationSpec) { factor, _ ->
+        Modifier.scale(
+            if (factor >= 0F) {
+                factor * (frontFactor - 1F) + 1F
+            } else {
+                factor * (1F - backFactor) + 1F
+            }
         )
     }

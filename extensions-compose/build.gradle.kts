@@ -59,5 +59,9 @@ kotlin {
             implementation(deps.junit.junit)
             implementation(compose.desktop.currentOs)
         }
+
+        android.main.dependencies {
+            implementation("androidx.compose.foundation:foundation:1.7.0-alpha07")
+        }
     }
 }

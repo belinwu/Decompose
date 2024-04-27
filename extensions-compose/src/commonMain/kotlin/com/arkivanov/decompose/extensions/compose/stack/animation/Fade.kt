@@ -14,8 +14,8 @@ fun fade(
     animationSpec: FiniteAnimationSpec<Float> = tween(),
     minAlpha: Float = 0F,
 ): StackAnimator =
-    stackAnimator(animationSpec = animationSpec) { factor, _, content ->
-        content(Modifier.alpha(getFadeAlpha(factor = factor, minAlpha = minAlpha)))
+    stackAnimator(animationSpec = animationSpec) { factor, _ ->
+        Modifier.alpha(getFadeAlpha(factor = factor, minAlpha = minAlpha))
     }
 
 internal fun getFadeAlpha(factor: Float, minAlpha: Float): Float =

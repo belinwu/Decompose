@@ -4,8 +4,10 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
+import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.value.Value
+import com.arkivanov.essenty.backhandler.BackHandlerOwner
 import com.arkivanov.sample.app.RootComponent.Child
 import kotlinx.serialization.Serializable
 
@@ -52,9 +54,11 @@ class DefaultImageComponent(
     override val image: Img,
 ) : ImageComponent, ComponentContext by componentContext
 
-interface RootComponent {
+interface RootComponent : BackHandlerOwner {
 
     val stack: Value<ChildStack<*, Child>>
+
+    fun onBack()
 
     sealed class Child {
         class Gallery(val component: GalleryComponent) : Child()
@@ -89,6 +93,10 @@ class DefaultRootComponent(
 
     private fun imageComponent(config: Config.Image, ctx: ComponentContext): ImageComponent =
         DefaultImageComponent(componentContext = ctx, image = config.image)
+
+    override fun onBack() {
+        nav.pop()
+    }
 
     @Serializable
     private sealed interface Config {

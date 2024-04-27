@@ -1,10 +1,11 @@
-@file:OptIn(ExperimentalSharedTransitionApi::class)
-
 package com.arkivanov.sample.app
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.ExperimentalTransitionApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.aspectRatio
@@ -21,17 +22,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.arkivanov.decompose.extensions.compose.stack.Children
+import com.arkivanov.decompose.extensions.compose.stack.animation.PredictiveBackAnimationConfig
 import com.arkivanov.decompose.extensions.compose.stack.animation.fade
-import com.arkivanov.decompose.extensions.compose.stack.animation.plus
-import com.arkivanov.decompose.extensions.compose.stack.animation.scale
 import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimation
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import com.arkivanov.sample.app.RootComponent.Child
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun SharedTransitionScope.GalleryContent(
     component: GalleryComponent,
-    isVisible: Boolean,
+    animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 128.dp),
@@ -42,9 +43,9 @@ fun SharedTransitionScope.GalleryContent(
                 model = image.url,
                 contentDescription = null,
                 modifier = Modifier
-                    .sharedElementWithCallerManagedVisibility(
-                        sharedContentState = rememberSharedContentState(key = image.id),
-                        visible = isVisible,
+                    .sharedElement(
+                        state = rememberSharedContentState(key = image.id),
+                        animatedVisibilityScope = animatedVisibilityScope,
                     )
                     .fillMaxWidth()
                     .aspectRatio(1F)
@@ -55,24 +56,26 @@ fun SharedTransitionScope.GalleryContent(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun SharedTransitionScope.ImageContent(
     component: ImageComponent,
-    isVisible: Boolean,
+    animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     AsyncImage(
         model = component.image.url,
         contentDescription = null,
         modifier = Modifier
-            .sharedElementWithCallerManagedVisibility(
-                sharedContentState = rememberSharedContentState(key = component.image.id),
-                visible = isVisible,
+            .sharedElement(
+                state = rememberSharedContentState(key = component.image.id),
+                animatedVisibilityScope = animatedVisibilityScope,
             )
             .fillMaxSize().background(Color.Black),
         contentScale = ContentScale.Fit,
     )
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalTransitionApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun RootContent(
     component: RootComponent,
@@ -83,19 +86,25 @@ fun RootContent(
         Children(
             stack = stack,
             modifier = Modifier.fillMaxSize().background(Color.Black),
-            animation = stackAnimation(fade() + scale()),
+            animation = stackAnimation(
+                animator = fade(),
+                predictiveBackAnimationConfig = PredictiveBackAnimationConfig(
+                    backHandler = component.backHandler,
+                    onBack = component::onBack,
+                ),
+            ),
         ) {
             when (val child = it.instance) {
                 is Child.Gallery ->
                     GalleryContent(
                         component = child.component,
-                        isVisible = stack.active.instance is Child.Gallery,
+                        animatedVisibilityScope = this,
                     )
 
                 is Child.Image ->
                     ImageContent(
                         component = child.component,
-                        isVisible = stack.active.instance is Child.Image,
+                        animatedVisibilityScope = this,
                     )
             }
         }
